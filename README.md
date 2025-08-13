@@ -115,4 +115,50 @@ For feedback and questions, please open an issue or contact [nectariferous](http
 
 ---
 
+## 🚀 Déploiement sur Render (PHP + PostgreSQL)
+
+Voici un guide rapide pour déployer l’application sur Render en production avec PostgreSQL.
+
+### Prérequis
+- Un compte Render (https://render.com)
+- Un fork ou accès à ce dépôt GitHub
+
+### Structure du projet
+- Le code Laravel est sous `core/`
+- Le point d’entrée web est `core/public/index.php`
+- La configuration base de données PostgreSQL est dans `core/config/database.php`
+
+### Fichier blueprint Render
+- Le dépôt inclut `render.yaml`, qui définit:
+  - Un service Web PHP
+  - Une base de données managée PostgreSQL
+  - Les commandes de build et de démarrage adaptées à Laravel
+
+### Étapes de déploiement
+1. Sur Render, cliquez sur “New +” → “Blueprint” et sélectionnez ce repo.
+2. Render détectera `render.yaml` et provisionnera:
+   - Un service Web: build dans `core/` (composer install, caches artisan, etc.)
+   - Une base PostgreSQL (plan gratuit par défaut)
+3. Après création, ouvrez la ressource Base de données et notez les variables:
+   - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+4. Allez au service Web et ajoutez ces variables d’environnement:
+   - `DB_CONNECTION=pgsql`
+   - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+   - `DB_SSLMODE=require` (par défaut dans `render.yaml`)
+   - `DB_SCHEMA=public` (par défaut)
+   - Optionnel: `APP_URL=https://<votre-domaine>`
+5. Redéployez si nécessaire. La clé applicative `APP_KEY` est générée en build (`php artisan key:generate --force`).
+
+### Notes importantes
+- Ne commitez pas `core/vendor/` ni `core/.env` (déjà gérés dans `.gitignore`).
+- Si des migrations applicatives sont absentes, vous devrez:
+  - Utiliser l’installateur initial si prévu par le projet, ou
+  - Me demander de générer/adapter des migrations compatibles PostgreSQL.
+- Le module de paiement crypto existant est désactivé; une intégration Fusion Pay sera faite ultérieurement.
+
+### Dépannage
+- Erreurs PDO/pgSQL: vérifiez les variables `DB_*` et que `DB_SSLMODE=require` est compatible avec votre instance.
+- 404/500 au démarrage: assurez-vous que le service démarre avec `-t core/public` et que `core/bootstrap/app.php` existe.
+- Problèmes de cache: re-déployez ou exécutez `php artisan config:clear && php artisan route:clear && php artisan view:clear` dans le build.
+
 Happy investing! 🎉

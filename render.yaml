@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: hyip-max
+    runtime: php
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://hyip-max.onrender.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_SCHEMA
+        value: public
+    buildCommand: |
+      cd core \
+      && composer install --no-dev --optimize-autoloader \
+      && php artisan key:generate --force \
+      && php artisan storage:link || true \
+      && php artisan config:cache \
+      && php artisan route:cache \
+      && php artisan view:cache
+    startCommand: |
+      php -S 0.0.0.0:$PORT -t core/public
+    autoDeploy: true
+    domains: []
+    
+  - type: postgres
+    name: hyip-max-db
+    plan: free
+    databaseName: hyipmax
+    user: hyipmax
+    
+# After creating, set the following env vars on the web service with values from the Postgres resource:
+#   DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
