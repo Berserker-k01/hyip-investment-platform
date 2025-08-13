@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SiteController;
 
-Route::get('/', function () {
-    return 'HYIP MAX is running';
-});
+// Homepage
+Route::get('/', [SiteController::class, 'index'])->name('home');
