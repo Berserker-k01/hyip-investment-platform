@@ -6,7 +6,8 @@ WORKDIR /app
 COPY core/composer.json core/composer.lock* ./core/
 RUN set -eux; \
     cd core; \
-    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+    composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --prefer-dist \
+      --ignore-platform-req=ext-pdo_pgsql
 
 # --- Stage 2: Runtime with Apache & PHP ---
 FROM php:8.2-apache
