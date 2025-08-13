@@ -16,6 +16,7 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class SiteController extends Controller
 {
@@ -25,12 +26,18 @@ class SiteController extends Controller
         // Default template
         $template = 'frontend.';
 
-        // If table exists, use configured theme safely
-        if (Schema::hasTable('general_settings')) {
-            $general = GeneralSetting::first();
-            if ($general && isset($general->theme)) {
-                $template = ($general->theme == 1) ? 'frontend.' : "theme{$general->theme}.";
+        // If DB reachable and table exists, use configured theme safely
+        try {
+            // Touch the connection to ensure DNS/creds are valid
+            DB::connection()->getPdo();
+            if (Schema::hasTable('general_settings')) {
+                $general = GeneralSetting::first();
+                if ($general && isset($general->theme)) {
+                    $template = ($general->theme == 1) ? 'frontend.' : "theme{$general->theme}.";
+                }
             }
+        } catch (\Throwable $e) {
+            // Keep default template when DB is not reachable/misconfigured
         }
 
         $this->template = $template;
