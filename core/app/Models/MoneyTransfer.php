@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class MoneyTransfer extends Model
+{
+    protected $table = 'money_transfers';
+    protected $guarded = [];
+}

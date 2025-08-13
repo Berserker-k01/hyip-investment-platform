@@ -15,14 +15,25 @@ use App\Models\MoneyTransfer;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class SiteController extends Controller
 {
 
     public function __construct()
     {
-        $general = GeneralSetting::first();
-        $this->template = $general->theme == 1 ? 'frontend.' : "theme{$general->theme}.";
+        // Default template
+        $template = 'frontend.';
+
+        // If table exists, use configured theme safely
+        if (Schema::hasTable('general_settings')) {
+            $general = GeneralSetting::first();
+            if ($general && isset($general->theme)) {
+                $template = ($general->theme == 1) ? 'frontend.' : "theme{$general->theme}.";
+            }
+        }
+
+        $this->template = $template;
     }
 
 
