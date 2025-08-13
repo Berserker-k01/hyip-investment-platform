@@ -40,10 +40,11 @@ RUN set -eux; \
     mkdir -p storage bootstrap/cache; \
     chown -R www-data:www-data storage bootstrap/cache
 
-# At runtime, Render sets $PORT. Reconfigure Apache to listen on it, then start.
-CMD ["bash", "-lc", "sed -i 's/^Listen .*/Listen ${PORT:-8080}/' /etc/apache2/ports.conf \
-  && sed -i 's/<VirtualHost \*:.*>/<VirtualHost *:${PORT:-8080}>/' /etc/apache2/sites-available/000-default.conf \
-  && apache2-foreground"]
+# Startup script (uses /bin/sh, no bash required)
+COPY ./start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]
 
 # Expose default port (informational; Render will map $PORT)
 EXPOSE 8080
