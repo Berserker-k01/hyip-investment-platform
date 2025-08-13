@@ -1,0 +1,25 @@
+# VCS
+.git
+.gitignore
+
+# Composer vendor (provided by build stage)
+/core/vendor
+
+# Node
+/core/node_modules
+/asset/node_modules
+
+# Env files
+/core/.env
+/core/.env.*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.iml
+
+# Build artifacts
+npm-debug.log*
+yarn-error.log*

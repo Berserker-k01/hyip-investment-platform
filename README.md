@@ -149,6 +149,50 @@ Voici un guide rapide pour déployer l’application sur Render en production av
    - Optionnel: `APP_URL=https://<votre-domaine>`
 5. Redéployez si nécessaire. La clé applicative `APP_KEY` est générée en build (`php artisan key:generate --force`).
 
+### Déploiement SANS Blueprint (création manuelle du service)
+Si vous ne pouvez pas utiliser le Blueprint, vous pouvez créer le service Web et la base PostgreSQL manuellement.
+
+1) Créer la base PostgreSQL
+- Render → New + → PostgreSQL → choisissez un nom (ex: hyip-max-db) → Create Database.
+- Une fois créée, notez `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
+
+2) Créer le service Web PHP
+- Render → New + → Web Service → Connecter le repo GitHub.
+- Runtime: PHP.
+- Build Command:
+  ```sh
+  cd core \
+  && composer install --no-dev --optimize-autoloader \
+  && php artisan key:generate --force \
+  && php artisan storage:link || true \
+  && php artisan config:cache \
+  && php artisan route:cache \
+  && php artisan view:cache
+  ```
+- Start Command:
+  ```sh
+  php -S 0.0.0.0:$PORT -t core/public
+  ```
+- Environment Variables (à ajouter au service Web):
+  - `APP_ENV=production`
+  - `APP_DEBUG=false`
+  - `APP_URL=https://<votre-domaine>` (optionnel)
+  - `DB_CONNECTION=pgsql`
+  - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` (depuis la DB Render)
+  - `DB_SSLMODE=require`
+  - `DB_SCHEMA=public`
+- Créez le service. Render exécutera la commande de build puis démarrera l’appli.
+
+3) Lier la base au service (optionnel)
+- Vous pouvez aussi utiliser la section “Resources” du service Web pour lier la DB à votre service, puis injecter automatiquement les `DB_*`.
+
+### Option Docker (avancé, non requis)
+Vous pouvez aussi dockeriser l’app (Nginx + PHP-FPM). À titre indicatif:
+- Dockerfile multi-stage: composer install, puis image finale avec php-fpm et sources dans `/var/www/html`.
+- Nginx config pointant sur `core/public/index.php` via `fastcgi_pass` sur php-fpm.
+- Render: New + → Web Service → Docker, avec `PORT=8080` exposé par Nginx.
+Cette option demande plus de maintenance et n’est pas nécessaire pour Render.
+
 ### Notes importantes
 - Ne commitez pas `core/vendor/` ni `core/.env` (déjà gérés dans `.gitignore`).
 - Si des migrations applicatives sont absentes, vous devrez:
