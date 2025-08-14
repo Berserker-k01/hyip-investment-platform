@@ -1,0 +1,105 @@
+// Prisma schema for HYIP MAX (PostgreSQL)
+// Migrations will be managed by Prisma; Laravel will continue to access tables via Eloquent.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model general_settings {
+  id            BigInt   @id @default(autoincrement())
+  theme         Int      @default(1)
+  site_currency String?  @db.VarChar(16)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model pages {
+  id              BigInt   @id @default(autoincrement())
+  name            String   @unique
+  sections        Json?
+  slug            String   @unique
+  seo_description String?
+  page_order      Int      @default(1)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model plans {
+  id            BigInt   @id @default(autoincrement())
+  name          String
+  min_deposit   Decimal  @default(0)
+  max_deposit   Decimal  @default(0)
+  profit_rate   Decimal  @default(0)
+  profit_type   String   @default("percent") @db.VarChar(16) // 'percent' | 'fixed'
+  duration_days Int      @default(0)
+  status        Int      @default(1)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model section_data {
+  id        BigInt   @id @default(autoincrement())
+  key       String   @unique
+  data      Json?
+  sections  Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model comments {
+  id          BigInt   @id @default(autoincrement())
+  user_id     BigInt?
+  author_name String?
+  author_email String?
+  content     String
+  status      Int      @default(1)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  @@index([user_id])
+}
+
+model payments {
+  id          BigInt   @id @default(autoincrement())
+  user_id     BigInt?
+  amount      Decimal  @default(0)
+  method      String?
+  status      Int      @default(0)
+  txid        String?
+  meta        Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  @@index([user_id])
+  @@index([status])
+}
+
+model money_transfers {
+  id           BigInt   @id @default(autoincrement())
+  from_user_id BigInt?
+  to_user_id   BigInt?
+  amount       Decimal  @default(0)
+  currency     String?  @db.VarChar(16)
+  status       Int      @default(1)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  @@index([from_user_id, to_user_id])
+}
+
+model transactions {
+  id           BigInt   @id @default(autoincrement())
+  user_id      BigInt?
+  trx          String?
+  type         String?  @db.VarChar(32)
+  amount       Decimal  @default(0)
+  post_balance Decimal  @default(0)
+  currency     String?  @db.VarChar(16)
+  status       Int      @default(1)
+  details      String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  @@index([user_id, trx])
+}

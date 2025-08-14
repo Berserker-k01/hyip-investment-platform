@@ -16,6 +16,13 @@ if [ ! -e /var/www/html/public/storage ]; then
   php /var/www/html/artisan storage:link >/dev/null 2>&1 || true
 fi
 
+# Run Prisma migrations (if Prisma is present and DATABASE_URL is set)
+if command -v npx >/dev/null 2>&1 && [ -n "${DATABASE_URL:-}" ]; then
+  if [ -f /var/www/html/package.json ] && [ -d /var/www/html/prisma ]; then
+    (cd /var/www/html && npx prisma migrate deploy >/dev/null 2>&1 || true)
+  fi
+fi
+
 # Update Apache to listen on Render's assigned port
 sed -i "s/^Listen .*/Listen ${PORT_TO_USE}/" /etc/apache2/ports.conf || true
 # Update VirtualHost port

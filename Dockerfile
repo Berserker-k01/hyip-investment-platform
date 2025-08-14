@@ -18,7 +18,13 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
       libpq-dev \
       git \
-      unzip; \
+      unzip \
+      curl \
+      ca-certificates; \
+    \
+    # Install Node.js 18 (required for Prisma)
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -; \
+    apt-get install -y --no-install-recommends nodejs; \
     docker-php-ext-install pdo pdo_pgsql; \
     a2enmod rewrite; \
     rm -rf /var/lib/apt/lists/*
@@ -34,6 +40,13 @@ WORKDIR /var/www/html
 COPY core/ /var/www/html/
 # Bring vendor from build stage
 COPY --from=vendor /app/core/vendor/ /var/www/html/vendor/
+
+# Install Node deps and generate Prisma client
+RUN set -eux; \
+    if [ -f package.json ]; then \
+      if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi; \
+      npx prisma generate; \
+    fi
 
 # Ensure storage and cache are writable
 RUN set -eux; \
