@@ -19,3 +19,14 @@ Route::get('/pages/{pages}', [SiteController::class, 'page'])->name('pages');
 
 // Blog listing (header link)
 Route::get('/blog', [SiteController::class, 'allblog'])->name('allblog');
+
+// Minimal placeholder auth routes to avoid missing route errors
+Route::get('/user/login', function () {
+    // Placeholder login route. Redirect to home or show a minimal info page.
+    return redirect()->route('home');
+})->name('user.login');
+
+Route::get('/user/dashboard', function () {
+    // Placeholder dashboard route. Redirect to home for now.
+    return redirect()->route('home');
+})->name('user.dashboard');
