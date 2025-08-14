@@ -1,7 +1,8 @@
 @php
     $content = content('banner.content');
     $counter = element('banner.element');
-    $contentData = optional($content)->data ?? (object) [
+
+    $defaults = [
         'backgroundimage' => 'banner-bg.jpg',
         'title' => 'Welcome to HYIP MAX',
         'short_description' => 'Start investing with flexible plans and transparent returns.',
@@ -11,6 +12,10 @@
         'button_text_2' => 'Learn More',
         'cta_title' => 'Platform overview',
     ];
+
+    // Merge DB data (if any) over defaults. If DB data is empty object, defaults remain.
+    $dbData = (array) (optional($content)->data ?? []);
+    $contentData = (object) array_merge($defaults, $dbData);
 @endphp
 
 <section class="banner-section cover-image"
