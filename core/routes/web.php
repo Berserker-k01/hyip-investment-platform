@@ -13,3 +13,9 @@ Route::get('/user/investment-calculate/{id}', [SiteController::class, 'investmen
 // Investment plan listing page (used by header menu)
 Route::get('/investment-plan', [SiteController::class, 'allInvestmentPlan'])
     ->name('investmentplan');
+
+// Dynamic CMS pages (header menu loop)
+Route::get('/pages/{pages}', [SiteController::class, 'page'])->name('pages');
+
+// Blog listing (header link)
+Route::get('/blog', [SiteController::class, 'allblog'])->name('allblog');

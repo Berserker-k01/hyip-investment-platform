@@ -1,3 +1,19 @@
+@php
+    // Provide safe defaults if controller didn't pass these
+    $pages = isset($pages) ? $pages : (function () {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('pages')) {
+                return \App\Models\Page::select('name', 'slug')
+                    ->where('status', 1)
+                    ->orderBy('page_order', 'asc')
+                    ->get();
+            }
+        } catch (\Throwable $e) {
+        }
+        return collect();
+    })();
+    $language_top = isset($language_top) ? $language_top : collect();
+@endphp
 <header id="header" class="fixed-top ">
     <div class="container d-flex align-items-center justify-content-lg-between">
 
