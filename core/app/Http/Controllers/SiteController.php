@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View as ViewFacade;
 
 class SiteController extends Controller
 {
@@ -115,6 +116,52 @@ class SiteController extends Controller
         $pageTitle = "Investment Plan";
         $plans = Plan::where('status', 1)->get();
         return view($this->template . 'pages.invest', compact('pageTitle', 'plans'));
+    }
+
+    // Lightweight endpoint used by AJAX in home banner to preview earning
+    public function investmentCalculate(Request $request, $id)
+    {
+        $amount = floatval($request->get('amount', 0));
+
+        if ($amount <= 0 || empty($id)) {
+            return response()->json([
+                'message' => __('Veuillez choisir un plan et saisir un montant valide.'),
+                'amount' => $amount,
+            ]);
+        }
+
+        // Try load the plan, but gracefully fallback if schema/data missing
+        $plan = null;
+        try {
+            if (Schema::hasTable('plans')) {
+                $plan = Plan::find($id);
+            }
+        } catch (\Throwable $e) {}
+
+        if (!$plan) {
+            return response()->json([
+                'message' => __('Plan introuvable ou non disponible.'),
+                'amount' => $amount,
+            ]);
+        }
+
+        // We may not know exact earning logic; show a neutral preview box
+        $partial = $this->template . 'partials.invest_preview';
+        if (ViewFacade::exists($partial)) {
+            $html = view($partial, [
+                'plan' => $plan,
+                'amount' => $amount,
+            ])->render();
+        } else {
+            $html = '<div id="profit-table" class="table-responsive">'
+                . '<table class="table table-dark"><tbody>'
+                . '<tr><td>Plan</td><td>' . e($plan->plan_name ?? ('#' . $plan->id)) . '</td></tr>'
+                . '<tr><td>Montant</td><td>' . number_format($amount, 2) . '</td></tr>'
+                . '<tr><td>Estimation</td><td>' . __('Calcul détaillé non configuré') . '</td></tr>'
+                . '</tbody></table></div>';
+        }
+
+        return response($html);
     }
 
     public function investmentUsingBalannce(Request $request)
