@@ -46,8 +46,16 @@
 
                 {{-- login for small device --}}
 
+                @php
+                    $isAuth = false;
+                    try {
+                        $isAuth = \Illuminate\Support\Facades\Auth::check();
+                    } catch (\Throwable $e) {
+                        $isAuth = false;
+                    }
+                @endphp
                 <li class="d-md-block d-lg-none d-block ">
-                    @if (Auth::user())
+                    @if ($isAuth)
                         <a class="nav-link" href="{{ route('user.dashboard') }}">{{ __('Dashboard') }}</a>
                     @else
                         <a class="nav-link" href="{{ route('user.login') }}">{{ __('Login') }}</a>
@@ -73,7 +81,7 @@
             <i class="bi bi-list mobile-nav-toggle"></i>
         </nav>
         <div class="header-right d-flex d-none  d-md-none d-lg-block">
-            @if (Auth::user())
+            @if ($isAuth)
                 <a href="{{ route('user.dashboard') }}" class="sp_btn_border sp_btn_sm me-3">{{ __('Dashboard') }}</a>
             @else
                 <a href="{{ route('user.login') }}" class="sp_btn_border sp_btn_sm me-3">{{ __('Login') }}</a>
