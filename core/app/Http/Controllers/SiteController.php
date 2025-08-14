@@ -48,21 +48,30 @@ class SiteController extends Controller
     {
 
         $pageTitle = 'Home';
+        $sections = null;
+        $plan = collect();
 
-        $sections = Page::where('name', 'home')->first();
+        try {
+            if (Schema::hasTable('pages')) {
+                $sections = Page::where('name', 'home')->first();
 
-        if (!$sections) {
+                if (!$sections) {
+                    $sections = Page::create([
+                        'name' => 'home',
+                        'sections' => ['about'],
+                        'slug' => 'home',
+                        'seo_description' => 'home',
+                        'page_order' => 1
+                    ]);
+                }
+            }
 
-            $sections = Page::create([
-                'name' => 'home',
-                'sections' => ['about'],
-                'slug' => 'home',
-                'seo_description' => 'home',
-                'page_order' => 1
-            ]);
+            if (Schema::hasTable('plans')) {
+                $plan = Plan::where('status', 1)->get();
+            }
+        } catch (\Throwable $e) {
+            // Render with safe defaults if DB not ready
         }
-
-        $plan = Plan::where('status', 1)->get();
 
         return view($this->template . 'home', compact('pageTitle', 'sections', 'plan'));
     }
