@@ -1,9 +1,21 @@
 @php
-$content = content('contact.content');
-$contentlink = content('footer.content');
-$footersociallink = element('footer.element');
-$serviceElements = element('service.element');
-
+    $content = content('contact.content');
+    $contentlink = content('footer.content');
+    $footersociallink = element('footer.element');
+    $serviceElements = element('service.element');
+    // Safe default for $pages if not provided by controller
+    $pages = isset($pages) ? $pages : (function () {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('pages')) {
+                return \App\Models\Page::select('name', 'slug')
+                    ->where('status', 1)
+                    ->orderBy('page_order', 'asc')
+                    ->get();
+            }
+        } catch (\Throwable $e) {
+        }
+        return collect();
+    })();
 @endphp
 
 <footer class="footer-section cover-image">

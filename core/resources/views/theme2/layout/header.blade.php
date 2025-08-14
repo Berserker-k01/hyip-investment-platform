@@ -1,6 +1,16 @@
 @php
     $contact = content('contact.content');
     $footersociallink = element('footer.element');
+    // Safe defaults
+    $language_top = isset($language_top) ? $language_top : (function () {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+                return \DB::table('languages')->select('short_code', 'name')->get();
+            }
+        } catch (\Throwable $e) {}
+        return collect([(object)['short_code' => 'en', 'name' => 'English']]);
+    })();
+    try { $isAuth = \Illuminate\Support\Facades\Auth::check(); } catch (\Throwable $e) { $isAuth = false; }
 @endphp
 
 <!-- header-section start  -->
@@ -61,7 +71,7 @@
             <li class="nav-item"><a href="#faq" class="nav-link">{{__('Faq')}}</a></li>
             <li class="nav-item"><a href="#testimonial" class="nav-link">{{__('Testimonial')}}</a></li>
             <li class="account-btn">
-              @if (Auth::user())
+              @if ($isAuth)
                   <a href="{{ route('user.dashboard') }}" class="nav-link">{{ __('Dashboard') }}</a>
               @else
                   <a href="{{ route('user.login') }}" class="nav-link">{{ __('Login') }}</a>

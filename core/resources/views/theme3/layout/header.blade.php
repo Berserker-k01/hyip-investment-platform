@@ -1,6 +1,27 @@
 @php
     $contact = content('contact.content');
     $footersociallink = element('footer.element');
+    // Safe defaults
+    $pages = isset($pages) ? $pages : (function () {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('pages')) {
+                return \App\Models\Page::select('name', 'slug')
+                    ->where('status', 1)
+                    ->orderBy('page_order', 'asc')
+                    ->get();
+            }
+        } catch (\Throwable $e) {}
+        return collect();
+    })();
+    $language_top = isset($language_top) ? $language_top : (function () {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('languages')) {
+                return \DB::table('languages')->select('short_code', 'name')->get();
+            }
+        } catch (\Throwable $e) {}
+        return collect([(object)['short_code' => 'en', 'name' => 'English']]);
+    })();
+    try { $isAuth = \Illuminate\Support\Facades\Auth::check(); } catch (\Throwable $e) { $isAuth = false; }
 @endphp  
   
   <!-- header-section start  -->
@@ -71,7 +92,7 @@
                     
                 </ul>
                 <div class="navbar-action">
-                    @if (Auth::user())
+                    @if ($isAuth)
                         <a class="btn main-btn btn-sm" href="{{ route('user.dashboard') }}">{{ __('Dashboard') }}</a>
                     @else
                         <a class="text-white me-3" href="{{ route('user.login') }}">{{ __('Login') }}</a>
