@@ -147,15 +147,15 @@ function safeGeneral()
 function gatewayImagePath()
 {
     $general = safeGeneral();
-
-    return "asset/theme{$general->theme}/images/gateways";
+    $theme = is_object($general) && isset($general->theme) ? $general->theme : 1;
+    return "asset/theme{$theme}/images/gateways";
 }
 
 function filePath($folder_name)
 {
     $general = safeGeneral();
-
-    return "asset/theme{$general->theme}/images/" . $folder_name;
+    $theme = is_object($general) && isset($general->theme) ? $general->theme : 1;
+    return "asset/theme{$theme}/images/" . $folder_name;
 }
 
 function frontendFormatter($key)
@@ -166,13 +166,13 @@ function frontendFormatter($key)
 function getFile($folder_name, $filename)
 {
     $general = safeGeneral();
+    $theme = is_object($general) && isset($general->theme) ? $general->theme : 1;
 
     if (file_exists(filePath($folder_name) . '/' . $filename) && $filename != null) {
-
-        return asset("asset/theme{$general->theme}/images/" . $folder_name . '/' . $filename);
+        return asset("asset/theme{$theme}/images/" . $folder_name . '/' . $filename);
     }
 
-    return asset("asset/theme{$general->theme}/images/placeholder.png");
+    return asset("asset/theme{$theme}/images/placeholder.png");
 }
 
 function variableReplacer($code, $value, $template)
@@ -296,22 +296,23 @@ function element($key, $take = 10)
 function template()
 {
     $general = safeGeneral();
-    if ($general->theme == 1) {
+    $theme = is_object($general) && isset($general->theme) ? $general->theme : 1;
+    if ($theme == 1) {
         return 'frontend.';
     } else {
-        return "theme{$general->theme}.";
+        return "theme{$theme}.";
     }
 }
 
 function sectionManager()
 {
     $general = safeGeneral();
-
-    if ($general->theme == 1) {
+    $theme = is_object($general) && isset($general->theme) ? $general->theme : 1;
+    if ($theme == 1) {
 
         return resource_path('views/') . 'sections.json';
     } else {
-        return resource_path('views/theme' . $general->theme . '/') . 'sections.json';
+        return resource_path('views/theme' . $theme . '/') . 'sections.json';
     }
 }
 
