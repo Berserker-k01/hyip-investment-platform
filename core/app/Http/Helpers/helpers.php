@@ -120,7 +120,10 @@ function safeGeneral()
 {
     try {
         if (Schema::hasTable('general_settings')) {
-            return GeneralSetting::first();
+            $g = GeneralSetting::first();
+            if ($g) {
+                return $g;
+            }
         }
     } catch (\Throwable $e) {
         // fall through to defaults
