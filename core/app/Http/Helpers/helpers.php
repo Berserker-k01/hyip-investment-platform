@@ -11,14 +11,13 @@ use App\Models\SectionData;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 
 function makeDirectory($path)
 {
     if (file_exists($path)) return true;
     return mkdir($path, 0755, true);
 }
-
-
 
 function removeFile($path)
 {
@@ -90,10 +89,6 @@ function uploadImage($file, $location, $size = null, $old = null, $thumb = null)
     return $filename;
 }
 
-
-
-
-
 function menuActive($routeName)
 {
 
@@ -121,31 +116,53 @@ function verificationCode($length)
     return random_int($min, $max);
 }
 
+function safeGeneral()
+{
+    try {
+        if (Schema::hasTable('general_settings')) {
+            return GeneralSetting::first();
+        }
+    } catch (\Throwable $e) {
+        // fall through to defaults
+    }
+    return (object) [
+        'theme' => 1,
+        'site_currency' => 'USD',
+        'email_method' => 'php',
+        'site_email' => 'no-reply@example.com',
+        'sitename' => config('app.name', 'HYIP MAX'),
+        'email_config' => (object) [
+            'smtp_host' => '',
+            'smtp_username' => '',
+            'smtp_password' => '',
+            'smtp_encryption' => 'tls',
+            'smtp_port' => 587,
+        ],
+    ];
+}
+
 function gatewayImagePath()
 {
-
-    $general = GeneralSetting::first();
+    $general = safeGeneral();
 
     return "asset/theme{$general->theme}/images/gateways";
 }
 
 function filePath($folder_name)
 {
-    $general = GeneralSetting::first();
+    $general = safeGeneral();
 
     return "asset/theme{$general->theme}/images/" . $folder_name;
 }
-
 
 function frontendFormatter($key)
 {
     return ucwords(str_replace('_', ' ', $key));
 }
 
-
 function getFile($folder_name, $filename)
 {
-    $general = GeneralSetting::first();
+    $general = safeGeneral();
 
     if (file_exists(filePath($folder_name) . '/' . $filename) && $filename != null) {
 
@@ -162,8 +179,7 @@ function variableReplacer($code, $value, $template)
 
 function sendGeneralMail($data)
 {
-    $general = GeneralSetting::first();
-
+    $general = safeGeneral();
 
     if ($general->email_method == 'php') {
         $headers = "From: $general->sitename <$general->site_email> \r\n";
@@ -202,12 +218,9 @@ function sendGeneralMail($data)
 
 function sendMail($key, array $data, $user)
 {
-
-    $general = GeneralSetting::first();
+    $general = safeGeneral();
 
     $template =  EmailTemplate::where('name', $key)->first();
-
-
 
     $message = variableReplacer('{username}', $user->username, $template->template);
     $message = variableReplacer('{sent_from}', @$general->sitename, $message);
@@ -250,24 +263,34 @@ function sendMail($key, array $data, $user)
         }
     }
 }
+
 function content($key)
 {
-    $general = GeneralSetting::first();
-
-    return SectionData::where('theme', $general->theme)->where('key', $key)->first();
+    $general = safeGeneral();
+    try {
+        if (Schema::hasTable('section_data')) {
+            return SectionData::where('theme', $general->theme)->where('key', $key)->first();
+        }
+    } catch (\Throwable $e) {
+    }
+    return null;
 }
 
 function element($key, $take = 10)
 {
-    $general = GeneralSetting::first();
-
-    return SectionData::where('theme', $general->theme)->where('key', $key)->take($take)->get();
+    $general = safeGeneral();
+    try {
+        if (Schema::hasTable('section_data')) {
+            return SectionData::where('theme', $general->theme)->where('key', $key)->take($take)->get();
+        }
+    } catch (\Throwable $e) {
+    }
+    return collect();
 }
 
 function template()
 {
-    $general = GeneralSetting::first();
-
+    $general = safeGeneral();
     if ($general->theme == 1) {
         return 'frontend.';
     } else {
@@ -277,7 +300,7 @@ function template()
 
 function sectionManager()
 {
-    $general = GeneralSetting::first();
+    $general = safeGeneral();
 
     if ($general->theme == 1) {
 
