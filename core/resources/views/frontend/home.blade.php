@@ -6,9 +6,13 @@
 
 
     @include('frontend.sections.banner')
-    @if ($sections->sections != null)
-        @foreach ($sections->sections as $sections)
-            @include('frontend.sections.'.$sections)
+    @php
+        // Ensure we have a list of section slugs; default to empty array
+        $sectionsList = (array) (optional($sections)->sections ?? []);
+    @endphp
+    @if (!empty($sectionsList))
+        @foreach ($sectionsList as $sec)
+            @include('frontend.sections.' . $sec)
         @endforeach
     @endif
 
