@@ -1,20 +1,30 @@
 @php
     $content = content('banner.content');
     $counter = element('banner.element');
+    $contentData = optional($content)->data ?? (object) [
+        'backgroundimage' => 'banner-bg.jpg',
+        'title' => 'Welcome to HYIP MAX',
+        'short_description' => 'Start investing with flexible plans and transparent returns.',
+        'button_text_link' => url('#plans'),
+        'button_text' => 'Get Started',
+        'button_text_2_link' => url('#about'),
+        'button_text_2' => 'Learn More',
+        'cta_title' => 'Platform overview',
+    ];
 @endphp
 
 <section class="banner-section cover-image"
-    style="background-image: url({{ getFile('banner', @$content->data->backgroundimage) }});">
+    style="background-image: url({{ getFile('banner', $contentData->backgroundimage ?? null) }});">
     <div class="container">
         <div class="row">
             <div class="col-xxl-6 col-xl-7 col-lg-8 text-lg-start text-center">
-                <h2 class="banner-title"> {{ __(@$content->data->title) }}</h2>
-                <p>{{ __(@$content->data->short_description) }}</p>
+                <h2 class="banner-title"> {{ __($contentData->title) }}</h2>
+                <p>{{ __($contentData->short_description) }}</p>
                 <div class="banner-btn-group justify-content-lg-start justify-content-center mt-4">
-                    <a href="{{ __(@$content->data->button_text_link) }}" class="sp_theme_btn">{{ __(@$content->data->button_text) }}</a>
-                    <a href="{{ __($content->data->button_text_2_link) }}" class="sp_border_btn">{{ __($content->data->button_text_2) }}</a>
+                    <a href="{{ __($contentData->button_text_link) }}" class="sp_theme_btn">{{ __($contentData->button_text) }}</a>
+                    <a href="{{ __($contentData->button_text_2_link) }}" class="sp_border_btn">{{ __($contentData->button_text_2) }}</a>
                 </div>
-                <h5 class="mt-5">{{ @$content->data->cta_title }}</h5>
+                <h5 class="mt-5">{{ $contentData->cta_title }}</h5>
                 <div class="row mt-4 overview-wrapper">
                     @foreach ($counter as $count)
                         <div class="col-lg-3 col-4">

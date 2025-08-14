@@ -44,11 +44,13 @@ model plans {
 
 model section_data {
   id        BigInt   @id @default(autoincrement())
-  key       String   @unique
+  theme     Int      @default(1)
+  key       String
   data      Json?
   sections  Json?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  @@index([theme, key])
 }
 
 model comments {

@@ -269,11 +269,13 @@ function content($key)
     $general = safeGeneral();
     try {
         if (Schema::hasTable('section_data')) {
-            return SectionData::where('theme', $general->theme)->where('key', $key)->first();
+            $row = SectionData::where('theme', $general->theme)->where('key', $key)->first();
+            if ($row) return $row;
         }
     } catch (\Throwable $e) {
     }
-    return null;
+    // Return a safe default object with empty data so Blade property access doesn't fail
+    return (object) ['data' => (object) []];
 }
 
 function element($key, $take = 10)
