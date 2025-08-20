@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SiteController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 // Homepage
 Route::get('/', [SiteController::class, 'index'])->name('home');
@@ -19,6 +21,36 @@ Route::get('/pages/{pages}', [SiteController::class, 'page'])->name('pages');
 
 // Blog listing (header link)
 Route::get('/blog', [SiteController::class, 'allblog'])->name('allblog');
+
+// Newsletter subscribe endpoint used by master.blade.js
+Route::post('/subscribe', function (Request $request) {
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation error',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    // TODO: persist the email into a subscriptions table or email provider
+    return response()->json([
+        'message' => 'Thanks for subscribing!',
+    ]);
+})->name('subscribe');
+
+// Language switcher stub used by master.blade.js (accepts ?lang=)
+Route::get('/change-lang', function (Request $request) {
+    $lang = $request->query('lang');
+    if ($lang) {
+        // Optionally set locale in session; keep minimal to avoid errors
+        session(['locale' => $lang]);
+        app()->setLocale($lang);
+    }
+    return redirect()->back();
+})->name('user.changeLang');
 
 // Minimal placeholder auth routes to avoid missing route errors
 Route::get('/user/login', function () {
